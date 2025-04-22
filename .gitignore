@@ -1,0 +1,10 @@
+.DS_Store
+.ipyt_checkpoints
+*.ipynb
+*.swp
+*.xlsx
+__pycache__/
+data/
+static/
+
+
