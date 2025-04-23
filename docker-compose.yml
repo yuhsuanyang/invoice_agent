@@ -6,7 +6,7 @@ services:
     image: n8nio/n8n:latest
     restart: always
     ports:
-      - "127.0.0.1:5678:5678" # 根據實際需求設定
+      - "127.0.0.1:5678:5678"
     environment:
       - N8N_COMMUNITY_NODES_ENABLED=true
       - N8N_ENABLE_NODE_DEV_ENV=true
@@ -20,7 +20,7 @@ services:
     build: ./app
     container_name: api
     ports:
-      - "127.0.0.1:8000:8000" # 根據實際需求設定
+      - "127.0.0.1:8000:8000"
     networks:
       - n8n_network
 
