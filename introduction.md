@@ -1,10 +1,5 @@
----
-title: Invoice Agent Workflow Descrip
-
----
-
 # Invoice Agent Workflow Description
-![diagram](https://hackmd.io/_uploads/rkJXCIUJex.jpg)
+![Alt text](diagram.jpg)
 ## Overview
 - 使用者將訂單的檔案提交之後，透過不同的google llm 模型解析客戶名稱、訂購日期、商品內容等資訊，再將商品內容送到模糊比對的api，最後生成一個json檔案
 ## Instructions
