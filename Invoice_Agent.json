@@ -1,0 +1,677 @@
+{
+  "name": "Invoice Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Upload file",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "File",
+              "fieldType": "file",
+              "acceptFileTypes": ".jpg,.jpeg,.png,.pdf,.xlsx",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "5acdf945-42fc-40a6-8d1e-13d65b370839",
+      "name": "On form submission",
+      "webhookId": "08b7794b-2302-49a7-a441-c4e8954dbed4"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "所提供的圖片是一份訂單資料\n請解析圖片中的訂購日期 客戶名稱 商品編號 名稱與數量\n如果沒有對應資訊 請回傳無\n回答時請使用繁體中文",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        700,
+        -180
+      ],
+      "id": "dc669ed2-1e8a-484a-a562-be51fc60205c",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-1.5-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1160,
+        240
+      ],
+      "id": "eb55bd29-8f62-4f5c-871b-8526b4d2bd69",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "C3M1XUeRsgAaeyGA",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.File[0].filename }}",
+                    "rightValue": ".png",
+                    "operator": {
+                      "type": "string",
+                      "operation": "endsWith"
+                    },
+                    "id": "2d65521f-17ca-4452-b732-edeb12861d62"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "120caf18-2b53-415e-bb6b-410d854d2364",
+                    "leftValue": "={{ $json.File[0].filename }}",
+                    "rightValue": ".jpeg",
+                    "operator": {
+                      "type": "string",
+                      "operation": "endsWith"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "a04059e0-c60a-41e1-92f5-6fa8c99e8189",
+                    "leftValue": "={{ $json.File[0].filename }}",
+                    "rightValue": ".pdf",
+                    "operator": {
+                      "type": "string",
+                      "operation": "endsWith"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        220,
+        0
+      ],
+      "id": "fd368280-1f84-4366-abdd-067e386ba8bf",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "所提供的文字是一份訂單資料\n請解析文字中的訂購日期 客戶名稱 商品編號 名稱與數量\n若無對應的資訊 請回傳空字串\n回答時請使用繁體中文",
+        "messages": {
+          "messageValues": [
+            {
+              "type": "HumanMessagePromptTemplate",
+              "message": "={{ $json.data }}"
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.6,
+      "position": [
+        660,
+        180
+      ],
+      "id": "a6637cbb-cdeb-428e-8634-319b5504cf3b",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "numberInputs": 3,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [
+        1940,
+        140
+      ],
+      "id": "15b11eea-fab9-4128-9e07-9e7810044283",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "curlImport": "",
+        "httpVariantWarning": "",
+        "method": "POST",
+        "url": "https://v2.convertapi.com/convert/pdf/to/txt",
+        "": "",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "convertApi",
+        "provideSslCertificates": false,
+        "sendQuery": false,
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/octet-stream"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "File",
+              "inputDataFieldName": "File"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": false,
+              "responseFormat": "text",
+              "outputPropertyName": "data"
+            }
+          }
+        },
+        "infoMessage": ""
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        440,
+        140
+      ],
+      "id": "1dcd7b27-78f0-49fa-8d96-d81af7d86009",
+      "name": "ConvertAPI pdf2txt",
+      "extendsCredential": "convertApi",
+      "credentials": {
+        "convertApi": {
+          "id": "krLa5DRmr1zg6SJm",
+          "name": "ConvertAPI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        660,
+        0
+      ],
+      "id": "f2045f71-9097-46da-96aa-10275b0c7546",
+      "name": "Google Gemini multimodal llm",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "C3M1XUeRsgAaeyGA",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://fastapi:8000/fuzzy_match",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "=",
+        "body": "={{ $json.output.items }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1580,
+        60
+      ],
+      "id": "1fe5c8a5-1c2a-40a3-b81e-560670b580c3",
+      "name": "Fuzzy Match API"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6359911e-34ef-478f-9d4c-d8404bd529f6",
+              "name": "output",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1000,
+        80
+      ],
+      "id": "39651176-acc2-465d-b5d7-0559d3ee1a66",
+      "name": "Change key name"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "846dc921-2b5e-4114-8a94-af2d7229668d",
+              "name": "order_date",
+              "value": "={{ $json.output.order_date }}",
+              "type": "string"
+            },
+            {
+              "id": "8552f104-b273-4416-9618-e67b45c560fa",
+              "name": "customer_name",
+              "value": "={{ $json.output.customer_name }}",
+              "type": "string"
+            },
+            {
+              "id": "be6add17-6e8b-4a15-8ad0-b7aa5bfb69f7",
+              "name": "items",
+              "value": "={{ $json.items }}",
+              "type": "array"
+            },
+            {
+              "id": "ba8397f9-8def-409c-8269-28d4adbe75e5",
+              "name": "output_filename",
+              "value": "={{ $json.output_filename }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2140,
+        -100
+      ],
+      "id": "7330feb3-59b4-47a5-8034-57b26d3a5884",
+      "name": "Select Output Data"
+    },
+    {
+      "parameters": {
+        "operation": "toJson",
+        "binaryPropertyName": "={{ $json.output_filename }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        2360,
+        -40
+      ],
+      "id": "9e03a1d6-9562-4204-a2e3-a2ce9203eddd",
+      "name": "Convert to JSON File"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-1.5-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        640,
+        380
+      ],
+      "id": "03a2d239-76ad-4e90-9cbb-33b8c9f2a5ca",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "C3M1XUeRsgAaeyGA",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.output }}",
+        "schemaType": "fromJson",
+        "jsonSchemaExample": "{\n  \"items\": [\n    {\n      \"product_id\": \"J001010\",\n      \"product_name\": \"東坡肉\",\n      \"amount\": 42,\n      \"unit\": \"塊\"\n    },\n    {\n      \"product_id\": \"F001100\",\n      \"product_name\": \"金針菇\",\n      \"amount\": 3,\n      \"unit\": \"把\"\n    }\n  ]\n}",
+        "options": {
+          "systemPromptTemplate": "You are an expert extraction algorithm.\nOnly extract relevant information from the text."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1,
+      "position": [
+        1180,
+        40
+      ],
+      "id": "05b1804e-26f7-4d5e-b0ff-8e67b2f9a8e9",
+      "name": "Output Items Extractor",
+      "alwaysOutputData": false,
+      "retryOnFail": false,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-1.5-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1280,
+        -120
+      ],
+      "id": "b8147f41-3027-45b1-a4d2-be3482691195",
+      "name": "Google Gemini Chat Model2",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "C3M1XUeRsgAaeyGA",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "language": "python",
+        "pythonCode": "# Loop over input items and add a new field called 'myNewField' to the JSON of each one\nfor item in _input.all():\n  output_filename = item.json.File[0].filename.split(\".\")[0]\n  output_filename += \".json\"\nreturn {\n  \"output_filename\": output_filename\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        420,
+        500
+      ],
+      "id": "89c761a2-16df-4163-880e-1f481a3f1142",
+      "name": "Generate Output Filename"
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.output }}",
+        "schemaType": "fromJson",
+        "jsonSchemaExample": "{\n\t\"order_date\": \"2025-03-01\",\n\t\"customer_name\": \"hello world\"\n}",
+        "options": {
+          "systemPromptTemplate": "You are an expert extraction algorithm.\nOnly extract relevant information from the text.\nPlease replace \"無\" with \"blank\""
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1,
+      "position": [
+        1220,
+        -280
+      ],
+      "id": "5ed6b6d9-3f6a-4fab-94d2-4ac031e3745e",
+      "name": "Output Information Extractor",
+      "alwaysOutputData": true
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Generate Output Filename",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Output Items Extractor",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Output Information Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Output Items Extractor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "ConvertAPI pdf2txt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Change key name",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Select Output Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ConvertAPI pdf2txt": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini multimodal llm": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fuzzy Match API": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Change key name": {
+      "main": [
+        [
+          {
+            "node": "Output Items Extractor",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Output Information Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Select Output Data": {
+      "main": [
+        [
+          {
+            "node": "Convert to JSON File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Output Items Extractor": {
+      "main": [
+        [
+          {
+            "node": "Fuzzy Match API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Output Information Extractor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Output Filename": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Output Information Extractor": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "2a18c808-9f3e-456b-b9a0-afc0bf0a4c04",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ad9681abc22c2cae63650c7805da448e742ff5566c6860675eb6b7710df99ea0"
+  },
+  "id": "iCVKxJ5fxvWdgZ0I",
+  "tags": []
+}
