@@ -9,7 +9,7 @@
             {
               "fieldLabel": "File",
               "fieldType": "file",
-              "acceptFileTypes": ".jpg,.jpeg,.png,.pdf,.xlsx",
+              "acceptFileTypes": ".jpg,.jpeg,.png,.pdf",
               "requiredField": true
             }
           ]
@@ -147,7 +147,7 @@
     {
       "parameters": {
         "promptType": "define",
-        "text": "所提供的文字是一份訂單資料\n請解析文字中的訂購日期 客戶名稱 商品編號 名稱與數量\n若無對應的資訊 請回傳空字串\n回答時請使用繁體中文",
+        "text": "所提供的文字是一份訂單資料\n請解析文字中的訂購日期 客戶名稱 商品編號 名稱與數量\n若無對應的資訊 請回傳無\n回答時請使用繁體中文",
         "messages": {
           "messageValues": [
             {
@@ -339,8 +339,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        2140,
-        -100
+        2160,
+        80
       ],
       "id": "7330feb3-59b4-47a5-8034-57b26d3a5884",
       "name": "Select Output Data"
@@ -349,13 +349,15 @@
       "parameters": {
         "operation": "toJson",
         "binaryPropertyName": "={{ $json.output_filename }}",
-        "options": {}
+        "options": {
+          "fileName": "={{ $json.output_filename }}"
+        }
       },
       "type": "n8n-nodes-base.convertToFile",
       "typeVersion": 1.1,
       "position": [
-        2360,
-        -40
+        2400,
+        60
       ],
       "id": "9e03a1d6-9562-4204-a2e3-a2ce9203eddd",
       "name": "Convert to JSON File"
@@ -667,7 +669,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "2a18c808-9f3e-456b-b9a0-afc0bf0a4c04",
+  "versionId": "0f8f0019-ce17-4a95-8670-9f1fd6592870",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "ad9681abc22c2cae63650c7805da448e742ff5566c6860675eb6b7710df99ea0"
