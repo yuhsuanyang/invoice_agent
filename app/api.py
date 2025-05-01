@@ -25,7 +25,7 @@ def fuzzy_match(product_id: str, product_name: str, unit: str, amount: int):
     if product_id in db["品號"]:
         match_item = db[db["品號"] == product_id]
         match_name = match_item["品名"].values[0]
-        unit = match_item["單位"].values[0]
+        match_unit = match_item["單位"].values[0]
         match_score = 100
     else:
         candidates = []
@@ -46,19 +46,21 @@ def fuzzy_match(product_id: str, product_name: str, unit: str, amount: int):
             match_item = db[db["product_and_unit"] == candidates[max_index]]
             product_id = match_item["品號"].values[0]
             match_name = match_item["品名"].values[0]
-            unit = match_item["單位"].values[0]
+            match_unit = match_item["單位"].values[0]
             match_score = round(similarities[max_index], 2)
         else:  # if no candidates found, return empty result
             product_id = ""
             match_name = ""
+            match_unit = ""
             match_score = 0
 
     return {
         "product_id": product_id,
         "match_name": match_name,
-        "original_input": product_name,
+        "original_input_name": product_name,
+        "original_input_unit": unit,
+        "unit": match_unit,
         "quantity": amount,
-        "unit": unit,
         "match_score": match_score,
     }
 
