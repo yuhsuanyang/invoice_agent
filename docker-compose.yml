@@ -12,7 +12,7 @@ services:
       - N8N_ENABLE_NODE_DEV_ENV=true
     volumes:
       - n8n_storage:/home/node/.n8n
-      - /Users/darcy/Desktop/development/invoice_agent/static:/home/node/files
+      # - /Users/darcy/Desktop/development/invoice_agent/static:/home/node/files
     networks:
       - n8n_network
 
