@@ -427,6 +427,55 @@
       ],
       "id": "b623e983-4649-48cf-a4a2-b29eb5a59e87",
       "name": "Text Agent"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nresults = \"\";\n// Create a new array with filtered items\nconst filteredItems = items.map(entry => {\n  filtered = entry.json.items.filter(item => item.match_score != 100);\n  // text = filtered.original_input;\n  for (item of filtered){\n    console.log(item)\n    results = results.concat(\n      item.original_input, \n      \"->\", \n      item.match_name, \n      \" \", \n      item.quantity.toString(), \n      item.unit,\n      \"\\n\"\n    )\n  }\n  return { json: { data: results } };\n});\n\nreturn filteredItems;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1900,
+        -180
+      ],
+      "id": "e6543158-e004-47a8-976e-0603c1b58caa",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.line.me/v2/bot/message/push",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "to",
+              "value": "U77ded6d0049619d15a5f6639147de7a8"
+            },
+            {
+              "name": "messages",
+              "value": "={{ [\n  {\n    \"type\":\"text\",\n    \"text\":\"親愛的顧客，系統無法確認下列品項的品名\"\n  },\n  {\n    \"type\":\"text\",\n    \"text\": $json.data\n  }\n]\n}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2120,
+        -180
+      ],
+      "id": "766ddd55-b81f-45bf-97aa-737b919a744d",
+      "name": "Line message push",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "DLrgRbWOqgYQv4t6",
+          "name": "Header Auth account"
+        }
+      }
     }
   ],
   "pinData": {},
@@ -523,6 +572,11 @@
             "node": "Merge",
             "type": "main",
             "index": 1
+          },
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
@@ -624,13 +678,24 @@
           }
         ]
       ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Line message push",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "dc7c70d6-1626-4099-b528-ed95b6c6aa4b",
+  "versionId": "adb032a1-5c4d-4f11-84a4-7e7985ed4c38",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "ad9681abc22c2cae63650c7805da448e742ff5566c6860675eb6b7710df99ea0"
