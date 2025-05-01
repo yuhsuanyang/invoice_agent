@@ -16,7 +16,7 @@
         - 節點`Generate Output Filename`: 例如輸入為`abc.jpg` 輸出將會是 `{output_filename: abc.json}` 
 
     2. (藍色）如果檔案為影像（.jpg,.jpeg,.png）則直接用Gemini解析
-        - 節點`AI Agent`: prompt 如下
+        - 節點`Image Agent`: prompt 如下
             ```
             所提供的圖片是一份訂單資料 
             請解析圖片中的訂購日期客戶名稱 商品編號 名稱與數量
@@ -25,14 +25,13 @@
             ```
     3. （桃紅）如果檔案為.pdf，則先轉成.txt再用Gemini解析
         - 節點`ConvertAPI pdf2txt`: 使用api  https://v2.convertapi.com/convert/pdf/to/txt
-        - 節點`BasicLLM`: prompt 如下
+        - 節點`Text Agent`: prompt 如下
             ```
             所提供的文字是一份訂單資料
             請解析文字中的訂購日期 客戶名稱 商品編號 名稱與數量
             若無對應的資訊 請回傳無
             回答時請使用繁體中文
             ```
-        - 節點`Change Key Name` : 修改output key 為了使節點`BasicLLM`和節點`AI Agent`一致
     4. （綠色）從2.,3. 的模型輸出中，用Gemini萃取出訂購日期（`order_date`）和客戶名稱（`customer_name`）並轉換成json格式
         - 節點`Output Information Extractor`: system prompt 如下
             ```
@@ -68,6 +67,11 @@
         }
         ```
         - 節點`Fuzzy Match API`: 連接一個fastapi server，由另一個container提供。fuzzy match 演算法詳請見`app/api.py`
-- 節點`Merge`: 將1.,4.,5.的輸出結合再一起
-- 節點`Select Ouput Data`: 挑選出要寫入最終json檔的欄位（`order_date`, `customer_name`, `items`, `output_filename`）
-- 節點`Convert to JSON File`: 輸出成.json檔，可供下載
+   6. （灰色）準備輸出成json檔
+	- 節點`Merge`: 將1.,4.,5.的輸出結合再一起
+	- 節點`Select Ouput Data`: 挑選出要寫入最終json檔的欄位（`order_date`, `customer_name`, `items`, `output_filename`）
+	- 節點`Convert to JSON File`: 輸出成.json檔，可供下載
+   7. （棕色）line 發送訊息告知不是 perfect match 的品項
+   	- 節點`Get Mismatch`: 找出matching score不是100的品項，並組成訊息格式，如”高師菜 3粒->高麗菜 3斤“
+   	- 節點`If`: 如果上個節點有非空白的輸出，則發送line;反之直接結束
+   	- 節點`Line message push`: 使用LINE Messaging API發送訊息
