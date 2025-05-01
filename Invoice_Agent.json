@@ -28,21 +28,6 @@
     },
     {
       "parameters": {
-        "promptType": "define",
-        "text": "所提供的圖片是一份訂單資料\n請解析圖片中的訂購日期 客戶名稱 商品編號 名稱與數量\n如果沒有對應資訊 請回傳無\n回答時請使用繁體中文",
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.8,
-      "position": [
-        700,
-        -180
-      ],
-      "id": "dc669ed2-1e8a-484a-a562-be51fc60205c",
-      "name": "AI Agent"
-    },
-    {
-      "parameters": {
         "modelName": "models/gemini-2.0-flash",
         "options": {}
       },
@@ -146,28 +131,6 @@
     },
     {
       "parameters": {
-        "promptType": "define",
-        "text": "所提供的文字是一份訂單資料\n請解析文字中的訂購日期 客戶名稱 商品編號 名稱與數量\n若無對應的資訊 請回傳無\n回答時請使用繁體中文",
-        "messages": {
-          "messageValues": [
-            {
-              "type": "HumanMessagePromptTemplate",
-              "message": "={{ $json.data }}"
-            }
-          ]
-        }
-      },
-      "type": "@n8n/n8n-nodes-langchain.chainLlm",
-      "typeVersion": 1.6,
-      "position": [
-        660,
-        180
-      ],
-      "id": "a6637cbb-cdeb-428e-8634-319b5504cf3b",
-      "name": "Basic LLM Chain"
-    },
-    {
-      "parameters": {
         "mode": "combine",
         "combineBy": "combineByPosition",
         "numberInputs": 3,
@@ -250,7 +213,7 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
       "typeVersion": 1,
       "position": [
-        660,
+        600,
         0
       ],
       "id": "f2045f71-9097-46da-96aa-10275b0c7546",
@@ -280,29 +243,6 @@
       ],
       "id": "1fe5c8a5-1c2a-40a3-b81e-560670b580c3",
       "name": "Fuzzy Match API"
-    },
-    {
-      "parameters": {
-        "assignments": {
-          "assignments": [
-            {
-              "id": "6359911e-34ef-478f-9d4c-d8404bd529f6",
-              "name": "output",
-              "value": "={{ $json.text }}",
-              "type": "string"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
-      "position": [
-        1000,
-        80
-      ],
-      "id": "39651176-acc2-465d-b5d7-0559d3ee1a66",
-      "name": "Change key name"
     },
     {
       "parameters": {
@@ -370,8 +310,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
       "typeVersion": 1,
       "position": [
-        640,
-        380
+        620,
+        340
       ],
       "id": "03a2d239-76ad-4e90-9cbb-33b8c9f2a5ca",
       "name": "Google Gemini Chat Model",
@@ -455,6 +395,38 @@
       "id": "5ed6b6d9-3f6a-4fab-94d2-4ac031e3745e",
       "name": "Output Information Extractor",
       "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "所提供的圖片是一份訂單資料\n請解析圖片中的訂購日期 客戶名稱 商品編號 名稱與數量\n如果沒有對應資訊 請回傳無\n回答時請使用繁體中文",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        640,
+        -180
+      ],
+      "id": "dc669ed2-1e8a-484a-a562-be51fc60205c",
+      "name": "Image Agent"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "所提供的文字是一份訂單資料\n請解析文字中的訂購日期 客戶名稱 商品編號 名稱與數量\n若無對應的資訊 請回傳無\n回答時請使用繁體中文",
+        "options": {
+          "systemMessage": "={{ $json.data }}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        640,
+        140
+      ],
+      "id": "b623e983-4649-48cf-a4a2-b29eb5a59e87",
+      "name": "Text Agent"
     }
   ],
   "pinData": {},
@@ -469,22 +441,6 @@
           },
           {
             "node": "Generate Output Filename",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "AI Agent": {
-      "main": [
-        [
-          {
-            "node": "Output Items Extractor",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Output Information Extractor",
             "type": "main",
             "index": 0
           }
@@ -506,14 +462,14 @@
       "main": [
         [
           {
-            "node": "AI Agent",
+            "node": "Image Agent",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "AI Agent",
+            "node": "Image Agent",
             "type": "main",
             "index": 0
           }
@@ -521,17 +477,6 @@
         [
           {
             "node": "ConvertAPI pdf2txt",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Basic LLM Chain": {
-      "main": [
-        [
-          {
-            "node": "Change key name",
             "type": "main",
             "index": 0
           }
@@ -553,7 +498,7 @@
       "main": [
         [
           {
-            "node": "Basic LLM Chain",
+            "node": "Text Agent",
             "type": "main",
             "index": 0
           }
@@ -564,7 +509,7 @@
       "ai_languageModel": [
         [
           {
-            "node": "AI Agent",
+            "node": "Image Agent",
             "type": "ai_languageModel",
             "index": 0
           }
@@ -578,22 +523,6 @@
             "node": "Merge",
             "type": "main",
             "index": 1
-          }
-        ]
-      ]
-    },
-    "Change key name": {
-      "main": [
-        [
-          {
-            "node": "Output Items Extractor",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Output Information Extractor",
-            "type": "main",
-            "index": 0
           }
         ]
       ]
@@ -613,7 +542,7 @@
       "ai_languageModel": [
         [
           {
-            "node": "Basic LLM Chain",
+            "node": "Text Agent",
             "type": "ai_languageModel",
             "index": 0
           }
@@ -663,13 +592,45 @@
           }
         ]
       ]
+    },
+    "Image Agent": {
+      "main": [
+        [
+          {
+            "node": "Output Information Extractor",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Output Items Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Text Agent": {
+      "main": [
+        [
+          {
+            "node": "Output Information Extractor",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Output Items Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "563edd51-445b-4242-b8a9-8e9cb69906e8",
+  "versionId": "dc7c70d6-1626-4099-b528-ed95b6c6aa4b",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "ad9681abc22c2cae63650c7805da448e742ff5566c6860675eb6b7710df99ea0"
